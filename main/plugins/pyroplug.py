@@ -1,12 +1,13 @@
 # Github.com/Vasusen-code
 
-import asyncio, time, os
+import asyncio, time, os, traceback
 
 from .. import Bot, bot
 from main.plugins.progress import progress_for_pyrogram
 from main.plugins.helpers import screenshot
 
 from pyrogram import Client, filters
+from pyrogram.enums import MessageMediaType
 from pyrogram.errors import ChannelBanned, ChannelInvalid, ChannelPrivate, ChatIdInvalid, ChatInvalid
 from ethon.pyfunc import video_metadata
 from telethon import events
@@ -45,7 +46,7 @@ async def get_msg(userbot, client, sender, edit_id, msg_link, i):
         try:
             msg = await userbot.get_messages(chat, msg_id)
             if msg.media:
-                if 'web_page' in msg.media:
+                if msg.media == MessageMediaType.WEB_PAGE:
                     edit = await client.edit_message_text(sender, edit_id, "Cloning.")
                     await client.send_message(sender, msg.text.markdown)
                     await edit.delete()
@@ -56,6 +57,7 @@ async def get_msg(userbot, client, sender, edit_id, msg_link, i):
                     await client.send_message(sender, msg.text.markdown)
                     await edit.delete()
                     return
+            print("trying to download")
             edit = await client.edit_message_text(sender, edit_id, "Trying to Download.")
             file = await userbot.download_media(
                 msg,
@@ -117,6 +119,8 @@ async def get_msg(userbot, client, sender, edit_id, msg_link, i):
             await client.edit_message_text(sender, edit_id, "Have you joined the channel?")
             return 
         except Exception as e:
+            print(e)
+            print(traceback.format_exc())
             await client.edit_message_text(sender, edit_id, f'Failed to save: `{msg_link}`')
             return 
     else:
@@ -126,6 +130,7 @@ async def get_msg(userbot, client, sender, edit_id, msg_link, i):
             await client.copy_message(int(sender), chat, msg_id)
         except Exception as e:
             print(e)
+            print(traceback.format_exc())
             return await client.edit_message_text(sender, edit_id, f'Failed to save: `{msg_link}`')
         await edit.delete()
         
